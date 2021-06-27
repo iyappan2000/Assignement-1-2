@@ -1,0 +1,36 @@
+
+*{
+    width: 100%;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    
+
+    
+}
+
+.header{
+    padding: 10px;
+}
+
+.input{
+    
+   
+    background-color: rgb(206, 206, 198);
+    width: 500px;
+
+}
+.input input{
+    padding: 10px 20px;
+}
+
+
+.task-title {
+   padding: 10px;
+    
+}
+.task:hover{
+    background-color: rgb(104, 105, 105);
+}
+.task{
+    background-color: rgb(250, 249, 249);
+    width: 500px;
+}
