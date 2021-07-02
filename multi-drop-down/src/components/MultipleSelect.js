@@ -1,77 +1,95 @@
 import React, { useState,useEffect,useRef } from "react";
-import './Style.css';
-import { FaRegWindowClose } from 'react-icons/fa';
+import "./Style.css";
+import axios from "axios";
+import { useQuery } from "react-query";
+import { FaWindowClose } from "react-icons/fa";
+import { FaAngleDown } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 
+function Multipleselect() {
+  const [name, setName] = useState("");
+  const [Visible, setVisible] = useState(false);
+  const [Addname, setAddname] = useState([]);
+  const [Filter, setFilter] = useState("", []);
+  const [Hidden, setHidden] = useState([]);
 
+  const GetAxios = async () => {
+    const { data } = await axios(
+      "https://api.instantwebtools.net/v1/passenger?page=0&size=10"
+    );
+    setLists(data);
+  };
 
+  const { data, isLoading, isError, isSuccess } = useQuery("data", GetAxios);
 
+  const [Lists, setLists] = useState({},[],data);
 
-const MultipleSelect= (props) => {
-    const [name,setName]=useState("",[]);
-    
+  
+  const Addhandler = (name) => {
+    if (name !== "") {
+      const taskDetails = {
+        value: name,
+      };
+      setAddname([...Addname, taskDetails]);
+    }
+  };
 
-    //HandleClick
-    const ClickHandler =(e)=> {
+  const removeall = () => {
+    if (name !== "") {
+      const clear = {
+        value: (
+          <button className="CloseIcon" onClick={removeHandler}>
+            <FaTimes/>
+          </button>
+        ),
+      };
+      setHidden([clear]);
+    }
+  };
+
+  const removeHandler = () => {
+    setAddname([]);
+    setHidden([]);
+  };
+
+  const removeTask = (e, value,name) => {
+    e.preventDefault();
+    setAddname(Addname.filter((t) => t.value !== value));
+    var task = {name};
+    setLists([...Lists,task]);
+  };
+
+  const filterHandler = (e) => {
+    setFilter(e.target.value);
+    console.log(Filter);
+  };
+
+  function filtered(options) {
+    return options.data.filter((option) =>
+      option.name.toLowerCase().includes(Filter.toLowerCase())
+    );
+  }
+
+  const removeOption = (options) => {
+    const removeitem = options.data.filter((option) => option.name !== name);
+    setLists(removeitem);
+  };
+
+  /**Handleclick */
+  const ClickHandler = (e) => {
     e.preventDefault();
     setName(e.target.value);
-    AddHandler();
-    
-    }
-    const[addname,setAddName]=useState([]);
-    const[state,setState]=useState(false);
-
-        //addtask
-        const AddHandler =() => {
-
-        const taskDetails={
-                
-                value: name,
-            };
-            
-            setAddName([...addname,taskDetails]);
-           
-        
-        };    
-        //removetask
-        const removeHandler = (e, value)=>{
-        e.preventDefault();
-        setAddName(addname.filter((t) => t.value !== value));
-        };
-        const[filtername,setFilterName]=useState("",[]);
-
-const filterHandler =(e)=>{
-setFilterName(e.target.value);
-console.log(filtername);
-
-}
-    //options
-  const [tasks] =useState([
-     { id:1,
-       value:"NewYork",
-     },
-     {id:2,
-      value:"Tokyo",
-     },
-     {id:3,
-      value:"Las Vegas",
-      },
-     {id:4,
-      value:"London",
-      }
-   ]);
-  
+    Addhandler(e.target.value);
+    // removeOption(e.target.value)
+  };
 
 
-const filtered = tasks.filter((tasks) =>
-    tasks.value.toLowerCase().includes(filtername.toLowerCase())
-  );
-
-
+  /**ClickOutside Function */
   let menuRef = useRef();
         useEffect(() => {
             let handler = (event) => {
             if(!menuRef.current.contains(event.target)){
-                setState(false);
+                setVisible(false);
             }
             
         }
@@ -81,33 +99,65 @@ const filtered = tasks.filter((tasks) =>
                 document.removeEventListener('mousedown',handler);
             }
         });
-    return(
-            <div>
-            <h3 style = {{marginLeft:'90px'}}>Multiple-Select- DropDown</h3>
-            <div ref = {menuRef}>
-            <div class="totalbox">
-            {addname.map((t) => (
-             <li class="addValue">{t.value} &nbsp;
-             <div class="button2" onClick={(e)=> removeHandler(e, t.value)}><div className ="close"><FaRegWindowClose/></div></div>
-             </li>))}
-             </div>
 
-             <input type="text" placeholder="Select Option...." onChange={(e) => filterHandler(e)} onClick={()=>setState(!state)}/>
-            
 
-            {state?
-                
-            <div class="container">
-                {filtered.map((a) => (
-                <div className="value" ><option onClick={ClickHandler} onChange = {removeHandler}>{a.value}</option></div>
+  return (
+    <div>
+          <h3 style = {{marginLeft:'430px'}}>Multiple Dropdown Task</h3>
+
+      <span>
+        {Hidden.map((r) => (
+          <div>{r.value} </div>
+        ))}{" "}
+      </span>
+    <div ref = {menuRef}>
+        <div className="Addingbox">
+          {Addname.map((data) => (
+            <div className="Addvalue" key={data.id}>
+              {data.value} &nbsp;
+              <FaWindowClose
+                onClick={(e) => {
+                  removeTask(e, data.value);
+                }}
+                className="windowcloseicon"
+              />
+            </div>
+          ))}
+          <input
+            type="text"
+            placeholder="Select Option..."
+            onChange={(e) => filterHandler(e)}
+            onClick={() => setVisible(!Visible)}
+          />
+          <button className="Downarrow" onClick={() => setVisible(!Visible)}>
+            <FaAngleDown />
+          </button>
+        </div>
+      
+        {isLoading ? <p>Loading </p> : null}
+        {isError && <p>error</p>}
+        {isSuccess && (
+          <div>
+            {Visible ? (
+              <div class="container">
+                {filtered(Lists).map((a) => (
+                  <div className="options">
+                    <option
+                      onClick={(e) => {
+                        ClickHandler(e);
+                        removeall();
+                      }}
+                    >
+                      {a.name}
+                    </option>{" "}
+                  </div>
                 ))}
-            </div>
-                
-            :null }
-            </div>
-            </div>
-            );
-            }
-
-export default MultipleSelect;
-
+              </div>
+            ) : null}
+          </div>
+        )}
+        </div>
+      </div>
+  );
+}
+export default Multipleselect;

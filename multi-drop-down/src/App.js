@@ -1,20 +1,25 @@
-import React from 'react';
-import MultipleSelect from './components/MultipleSelect.js';
-// import Lists from './components/Lists';
-// import Task from './components/Task';
-// import App1 from './New1/App1';
-// import Select from './components/Select';
-function App() {
   
+import Multipleselect from "./components/MultipleSelect";
+import { QueryClientProvider, QueryClient } from 'react-query';
 
-  return (
-    <div>
-      {/* <Task/>
-      <App1/> */}
-      <MultipleSelect/>
-      {/* <Select/> */}
-    </div>
-  )
+
+ 
+    
+
+ function App() {
+
+    const queryClient = new QueryClient()
+
+    return (
+        <>
+            <QueryClientProvider client={queryClient}>
+                <div>
+                    <Multipleselect />
+                </div>
+            </QueryClientProvider>
+        </>
+    )
 }
+ 
 
 export default App;
